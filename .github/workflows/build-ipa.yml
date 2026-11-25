@@ -50,6 +50,15 @@ jobs:
           fi
           if [ -d "assets/icons" ]; then
             cp assets/icons/* Payload/RouterAI.app/
+            # Standard icon filenames for legacy sideloaders and SpringBoard
+            cp assets/icons/AppIcon60x60@2x.png Payload/RouterAI.app/AppIcon60x60.png || true
+            cp assets/icons/AppIcon60x60@2x.png Payload/RouterAI.app/Icon.png || true
+            cp assets/icons/AppIcon60x60@2x.png Payload/RouterAI.app/Icon@2x.png || true
+            cp assets/icons/AppIcon60x60@3x.png Payload/RouterAI.app/Icon@3x.png || true
+            cp assets/icons/AppIcon60x60@2x.png Payload/RouterAI.app/Icon-60@2x.png || true
+            cp assets/icons/AppIcon60x60@3x.png Payload/RouterAI.app/Icon-60@3x.png || true
+            cp assets/icons/AppIcon1024.png Payload/RouterAI.app/AppIcon.png || true
+            
             # Sideload managers (Esign, Scarlet, Sideloadly) look for iTunesArtwork at root
             cp assets/icons/iTunesArtwork iTunesArtwork 2>/dev/null || true
             cp assets/icons/iTunesArtwork@2x iTunesArtwork@2x 2>/dev/null || true
@@ -85,9 +94,9 @@ jobs:
               <key>CFBundlePackageType</key>
               <string>APPL</string>
               <key>CFBundleShortVersionString</key>
-              <string>1.0.0</string>
+              <string>1.0.1</string>
               <key>CFBundleVersion</key>
-              <string>1</string>
+              <string>2</string>
               <key>MinimumOSVersion</key>
               <string>14.0</string>
               <key>LSRequiresIPhoneOS</key>
@@ -103,6 +112,8 @@ jobs:
               <string>LaunchScreen</string>
               <key>UILaunchScreen</key>
               <dict/>
+              <key>CFBundleIconFile</key>
+              <string>AppIcon60x60</string>
               <key>CFBundleIcons</key>
               <dict>
                   <key>CFBundlePrimaryIcon</key>
@@ -113,6 +124,8 @@ jobs:
                           <string>AppIcon29x29</string>
                           <string>AppIcon40x40</string>
                           <string>AppIcon60x60</string>
+                          <string>icon</string>
+                          <string>Icon</string>
                       </array>
                       <key>CFBundleIconName</key>
                       <string>AppIcon</string>
@@ -130,6 +143,8 @@ jobs:
                           <string>AppIcon60x60</string>
                           <string>AppIcon76x76</string>
                           <string>AppIcon83.5x83.5</string>
+                          <string>icon</string>
+                          <string>Icon</string>
                       </array>
                       <key>CFBundleIconName</key>
                       <string>AppIcon</string>
@@ -144,6 +159,7 @@ jobs:
                   <string>AppIcon76x76</string>
                   <string>AppIcon83.5x83.5</string>
                   <string>icon.png</string>
+                  <string>Icon.png</string>
               </array>
               <key>UIRequiredDeviceCapabilities</key>
               <array>

@@ -12,9 +12,74 @@ use components::{TopHeader, BottomNavBar, CurrentTab};
 use views::*;
 use theme::MAIN_CSS;
 
+#[cfg(target_os = "ios")]
+fn get_screen_bounds() -> (f64, f64) {
+    #[repr(C)]
+    #[derive(Copy, Clone)]
+    struct CGPoint {
+        x: f64,
+        y: f64,
+    }
+    #[repr(C)]
+    #[derive(Copy, Clone)]
+    struct CGSize {
+        width: f64,
+        height: f64,
+    }
+    #[repr(C)]
+    #[derive(Copy, Clone)]
+    struct CGRect {
+        origin: CGPoint,
+        size: CGSize,
+    }
+
+    unsafe impl objc::Encode for CGPoint {
+        fn encode() -> objc::Encoding {
+            unsafe { objc::Encoding::from_str("{CGPoint=dd}") }
+        }
+    }
+    unsafe impl objc::Encode for CGSize {
+        fn encode() -> objc::Encoding {
+            unsafe { objc::Encoding::from_str("{CGSize=dd}") }
+        }
+    }
+    unsafe impl objc::Encode for CGRect {
+        fn encode() -> objc::Encoding {
+            unsafe { objc::Encoding::from_str("{CGRect={CGPoint=dd}{CGSize=dd}}") }
+        }
+    }
+
+    unsafe {
+        use objc::{class, msg_send, sel, sel_impl};
+        let screen: *mut objc::runtime::Object = msg_send![class!(UIScreen), mainScreen];
+        if !screen.is_null() {
+            let bounds: CGRect = msg_send![screen, bounds];
+            if bounds.size.width > 50.0 && bounds.size.height > 50.0 {
+                return (bounds.size.width, bounds.size.height);
+            }
+        }
+    }
+    (393.0, 852.0)
+}
+
+#[cfg(not(target_os = "ios"))]
+fn get_screen_bounds() -> (f64, f64) {
+    (393.0, 852.0)
+}
+
 fn main() {
+    let (screen_w, screen_h) = get_screen_bounds();
+
+    // Explicitly configure WindowBuilder with native screen dimensions to prevent Dioxus desktop
+    // from injecting a default 800x600 desktop window size on iOS devices.
+    let window = dioxus::mobile::WindowBuilder::new()
+        .with_title("RouterAI")
+        .with_inner_size(dioxus::mobile::LogicalSize::new(screen_w, screen_h))
+        .with_resizable(false);
+
     // Launch native mobile Dioxus app with iOS-specific viewport and safe area shell
     let cfg = dioxus::mobile::Config::default()
+        .with_window(window)
         .with_custom_index(r#"<!DOCTYPE html>
 <html>
     <head>
