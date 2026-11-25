@@ -1,3 +1,6 @@
+pub mod logo;
+pub use logo::{LOGO_DATA_URI, LOGO_SMALL_DATA_URI};
+
 pub const MAIN_CSS: &str = r#"
 * {
     box-sizing: border-box;

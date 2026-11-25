@@ -132,6 +132,36 @@ impl ApiClient {
         serde_json::from_str(&body).map_err(|e| format!("Lỗi định dạng: {}", e))
     }
 
+    /// Đăng nhập bằng mã Token đồng bộ từ Web (JWT Token)
+    pub async fn login_with_token(&self, token: &str) -> Result<User, String> {
+        Self::set_token(token.trim());
+        self.get_me().await
+    }
+
+    /// Đăng nhập bằng dữ liệu Telegram Auth Widget
+    pub async fn login_telegram_data(&self, mut val: serde_json::Value) -> Result<AuthResponse, String> {
+        let url = format!("{}/api/v1/auth/login", self.base_url);
+        if let Some(obj) = val.as_object_mut() {
+            obj.insert("deviceId".to_string(), serde_json::Value::String("ios_rust_device".to_string()));
+        }
+
+        let res = self.http.post(&url)
+            .json(&val)
+            .send()
+            .await
+            .map_err(|e| format!("Lỗi kết nối máy chủ: {}", e))?;
+
+        let body = res.text().await.map_err(|e| format!("Lỗi đọc phản hồi: {}", e))?;
+        let auth_res: AuthResponse = serde_json::from_str(&body)
+            .map_err(|e| format!("Lỗi xử lý phản hồi: {}", e))?;
+
+        if let Some(jwt) = &auth_res.jwt {
+            Self::set_token(&jwt.token);
+        }
+
+        Ok(auth_res)
+    }
+
     /// Lấy thông tin tài khoản hiện tại
     pub async fn get_me(&self) -> Result<User, String> {
         let url = format!("{}/api/v1/auth/info", self.base_url);

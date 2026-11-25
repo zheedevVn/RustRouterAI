@@ -15,6 +15,8 @@ pub enum CurrentTab {
     Settings,
 }
 
+use crate::theme::LOGO_SMALL_DATA_URI;
+
 #[component]
 pub fn TopHeader(user: Option<User>, on_logout: EventHandler<()>) -> Element {
     let username = user.as_ref().map(|u| u.username.clone()).unwrap_or_else(|| "Thành viên".to_string());
@@ -22,7 +24,7 @@ pub fn TopHeader(user: Option<User>, on_logout: EventHandler<()>) -> Element {
     rsx! {
         header { class: "top-header",
             div { class: "brand-badge",
-                img { src: "assets/Logo-Small.png", alt: "RouterAI" }
+                img { src: "{LOGO_SMALL_DATA_URI}", alt: "RouterAI" }
                 span { "RouterAI" }
             }
 
