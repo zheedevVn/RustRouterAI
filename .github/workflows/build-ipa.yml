@@ -1,0 +1,105 @@
+name: Build iOS IPA (Rust)
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build-ios:
+    name: Build & Package iOS IPA
+    runs-on: macos-14
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Rust Toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-ios
+
+      - name: Cache Cargo Dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
+      - name: Build iOS Binary (ARM64 Release)
+        run: |
+          cargo build --release --target aarch64-apple-ios
+
+      - name: Package iOS IPA (Ad-Hoc / Sideload Ready)
+        run: |
+          mkdir -p Payload/RouterAI.app
+          cp target/aarch64-apple-ios/release/routerai-mobile Payload/RouterAI.app/RouterAI
+          chmod +x Payload/RouterAI.app/RouterAI
+          
+          # Copy Assets
+          if [ -d "assets" ]; then
+            cp -r assets Payload/RouterAI.app/
+          fi
+          
+          # Create Info.plist
+          cat << 'EOF' > Payload/RouterAI.app/Info.plist
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+              <key>CFBundleExecutable</key>
+              <string>RouterAI</string>
+              <key>CFBundleIdentifier</key>
+              <string>space.mmovn.routerai</string>
+              <key>CFBundleName</key>
+              <string>RouterAI</string>
+              <key>CFBundleDisplayName</key>
+              <string>RouterAI</string>
+              <key>CFBundlePackageType</key>
+              <string>APPL</string>
+              <key>CFBundleShortVersionString</key>
+              <string>1.0.0</string>
+              <key>CFBundleVersion</key>
+              <string>1</string>
+              <key>LSRequiresIPhoneOS</key>
+              <true/>
+              <key>UILaunchStoryboardName</key>
+              <string>LaunchScreen</string>
+              <key>UIRequiredDeviceCapabilities</key>
+              <array>
+                  <string>arm64</string>
+              </array>
+              <key>UISupportedInterfaceOrientations</key>
+              <array>
+                  <string>UIInterfaceOrientationPortrait</string>
+                  <string>UIInterfaceOrientationPortraitUpsideDown</string>
+                  <string>UIInterfaceOrientationLandscapeLeft</string>
+                  <string>UIInterfaceOrientationLandscapeRight</string>
+              </array>
+              <key>NSAppTransportSecurity</key>
+              <dict>
+                  <key>NSAllowsArbitraryLoads</key>
+                  <true/>
+              </dict>
+          </dict>
+          </plist>
+          EOF
+
+          # Create IPA archive
+          zip -r -y RouterAI.ipa Payload
+          echo "IPA created successfully: $(ls -lh RouterAI.ipa)"
+
+      - name: Upload RouterAI-iOS-Package Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: RouterAI-iOS-Package
+          path: RouterAI.ipa
+          if-no-files-found: error

@@ -1,0 +1,19 @@
+[application]
+name = "RouterAI"
+default_platform = "mobile"
+asset_dir = "assets"
+
+[mobile]
+app_name = "RouterAI"
+package_name = "space.mmovn.routerai"
+icon = "assets/icon_1024.png"
+
+[bundle]
+identifier = "space.mmovn.routerai"
+publisher = "RouterAI"
+icon = ["assets/icon_1024.png"]
+resources = ["assets/*"]
+copyright = "Copyright © 2026 RouterAI"
+short_description = "RouterAI Telegram Automation Suite"
+long_description = "Hệ thống quản lý, quét nhóm và tự động hóa RouterAI trên iOS."
+category = "Productivity"
