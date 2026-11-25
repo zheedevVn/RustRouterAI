@@ -44,12 +44,18 @@ jobs:
           cp target/aarch64-apple-ios/release/routerai-mobile Payload/RouterAI.app/RouterAI
           chmod +x Payload/RouterAI.app/RouterAI
           
-          # Copy Assets
+          # Copy Assets & Icons directly into app bundle root
           if [ -d "assets" ]; then
             cp -r assets Payload/RouterAI.app/
           fi
+          if [ -d "assets/icons" ]; then
+            cp assets/icons/* Payload/RouterAI.app/
+            # Sideload managers (Esign, Scarlet, Sideloadly) look for iTunesArtwork at root
+            cp assets/icons/iTunesArtwork iTunesArtwork 2>/dev/null || true
+            cp assets/icons/iTunesArtwork@2x iTunesArtwork@2x 2>/dev/null || true
+          fi
           
-          # Create Info.plist
+          # Create Info.plist with modern UILaunchScreen (full-screen, no letterboxing) & AppIcon declarations
           cat << 'EOF' > Payload/RouterAI.app/Info.plist
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -71,13 +77,61 @@ jobs:
               <string>1</string>
               <key>LSRequiresIPhoneOS</key>
               <true/>
-              <key>UILaunchStoryboardName</key>
-              <string>LaunchScreen</string>
+              <key>UIRequiresFullScreen</key>
+              <true/>
+              <key>UILaunchScreen</key>
+              <dict/>
+              <key>CFBundleIcons</key>
+              <dict>
+                  <key>CFBundlePrimaryIcon</key>
+                  <dict>
+                      <key>CFBundleIconFiles</key>
+                      <array>
+                          <string>AppIcon20x20</string>
+                          <string>AppIcon29x29</string>
+                          <string>AppIcon40x40</string>
+                          <string>AppIcon60x60</string>
+                      </array>
+                      <key>CFBundleIconName</key>
+                      <string>AppIcon</string>
+                  </dict>
+              </dict>
+              <key>CFBundleIcons~ipad</key>
+              <dict>
+                  <key>CFBundlePrimaryIcon</key>
+                  <dict>
+                      <key>CFBundleIconFiles</key>
+                      <array>
+                          <string>AppIcon20x20</string>
+                          <string>AppIcon29x29</string>
+                          <string>AppIcon40x40</string>
+                          <string>AppIcon60x60</string>
+                          <string>AppIcon76x76</string>
+                          <string>AppIcon83.5x83.5</string>
+                      </array>
+                      <key>CFBundleIconName</key>
+                      <string>AppIcon</string>
+                  </dict>
+              </dict>
+              <key>CFBundleIconFiles</key>
+              <array>
+                  <string>AppIcon20x20</string>
+                  <string>AppIcon29x29</string>
+                  <string>AppIcon40x40</string>
+                  <string>AppIcon60x60</string>
+                  <string>AppIcon76x76</string>
+                  <string>AppIcon83.5x83.5</string>
+                  <string>icon.png</string>
+              </array>
               <key>UIRequiredDeviceCapabilities</key>
               <array>
                   <string>arm64</string>
               </array>
               <key>UISupportedInterfaceOrientations</key>
+              <array>
+                  <string>UIInterfaceOrientationPortrait</string>
+              </array>
+              <key>UISupportedInterfaceOrientations~ipad</key>
               <array>
                   <string>UIInterfaceOrientationPortrait</string>
                   <string>UIInterfaceOrientationPortraitUpsideDown</string>
@@ -93,8 +147,8 @@ jobs:
           </plist>
           EOF
 
-          # Create IPA archive
-          zip -r -y RouterAI.ipa Payload
+          # Create IPA archive including Payload and root iTunesArtwork
+          zip -r -y RouterAI.ipa Payload iTunesArtwork iTunesArtwork@2x
           echo "IPA created successfully: $(ls -lh RouterAI.ipa)"
 
       - name: Upload RouterAI-iOS-Package Artifact

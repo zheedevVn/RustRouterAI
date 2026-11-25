@@ -9,28 +9,42 @@ pub const MAIN_CSS: &str = r#"
 body, html {
     width: 100%;
     height: 100%;
+    margin: 0;
+    padding: 0;
     background-color: #1e1f22;
     color: #dbdee1;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     font-size: 14px;
     line-height: 1.5;
-    overflow-x: hidden;
+    overflow: hidden;
+    position: fixed;
+    inset: 0;
     user-select: none;
     -webkit-user-select: none;
+    -webkit-touch-callout: none;
+}
+
+#main {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
 /* Safe areas for iOS iPhone notch and home indicator */
 .app-container {
     display: flex;
     flex-direction: column;
-    width: 100vw;
-    height: 100vh;
-    padding-top: env(safe-area-inset-top);
-    padding-bottom: env(safe-area-inset-bottom);
-    padding-left: env(safe-area-inset-left);
-    padding-right: env(safe-area-inset-right);
+    width: 100%;
+    height: 100%;
+    flex: 1;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    padding-left: env(safe-area-inset-left, 0px);
+    padding-right: env(safe-area-inset-right, 0px);
     background-color: #1e1f22;
     overflow: hidden;
+    box-sizing: border-box;
 }
 
 /* Header Bar */

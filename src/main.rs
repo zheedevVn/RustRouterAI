@@ -13,8 +13,26 @@ use views::*;
 use theme::MAIN_CSS;
 
 fn main() {
-    // Launch native mobile Dioxus app
-    dioxus::launch(App);
+    // Launch native mobile Dioxus app with iOS-specific viewport and safe area shell
+    let cfg = dioxus::mobile::Config::default()
+        .with_custom_index(r#"<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>RouterAI</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+        <meta name="format-detection" content="telephone=no">
+        <!-- CUSTOM HEAD -->
+    </head>
+    <body style="margin: 0; padding: 0; background-color: #1e1f22; width: 100%; height: 100%; overflow: hidden; position: fixed; inset: 0;">
+        <div id="main" style="width: 100%; height: 100%; display: flex; flex-direction: column;"></div>
+        <!-- MODULE LOADER -->
+    </body>
+</html>"#.to_string());
+
+    LaunchBuilder::mobile().with_cfg(cfg).launch(App);
 }
 
 #[component]

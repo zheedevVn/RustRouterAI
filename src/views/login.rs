@@ -103,10 +103,10 @@ pub fn LoginView(on_login_success: EventHandler<User>) -> Element {
 
     rsx! {
         div {
-            style: "display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; padding: 20px;",
+            style: "flex: 1; display: flex; align-items: center; justify-content: center; width: 100%; min-height: 0; padding: 16px; overflow-y: auto; box-sizing: border-box;",
             div {
                 class: "card",
-                style: "width: 100%; max-width: 380px; padding: 24px; text-align: center; margin-bottom: 0;",
+                style: "width: 100%; max-width: 380px; padding: 24px; text-align: center; margin: auto; box-sizing: border-box;",
 
                 img {
                     src: "assets/Logo.png",
