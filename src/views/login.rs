@@ -4,21 +4,13 @@ use crate::models::User;
 use crate::components::icons::*;
 use crate::theme::LOGO_DATA_URI;
 
-#[derive(Clone, Copy, PartialEq)]
-enum AuthTab {
-    Login,
-    Register,
-    TelegramSync,
-}
-
 #[component]
 pub fn LoginView(on_login_success: EventHandler<User>) -> Element {
-    let mut current_tab = use_signal(|| AuthTab::Login);
+    let mut is_register = use_signal(|| false);
     let mut username = use_signal(String::new);
     let mut password = use_signal(String::new);
     let mut confirm_password = use_signal(String::new);
     let mut email = use_signal(String::new);
-    let mut token_input = use_signal(String::new);
     let mut loading = use_signal(|| false);
     let mut error_msg = use_signal(|| Option::<String>::None);
     let mut notice_msg = use_signal(|| Option::<String>::None);
@@ -26,7 +18,7 @@ pub fn LoginView(on_login_success: EventHandler<User>) -> Element {
     let handle_submit = move |_| {
         let u = username();
         let p = password();
-        let tab = current_tab();
+        let is_reg = is_register();
         let conf_p = confirm_password();
         let em = email();
 
@@ -35,7 +27,7 @@ pub fn LoginView(on_login_success: EventHandler<User>) -> Element {
             return;
         }
 
-        if tab == AuthTab::Register && p != conf_p {
+        if is_reg && p != conf_p {
             error_msg.set(Some("Mật khẩu xác nhận không trùng khớp!".to_string()));
             return;
         }
@@ -46,7 +38,7 @@ pub fn LoginView(on_login_success: EventHandler<User>) -> Element {
 
         spawn(async move {
             let api = ApiClient::new();
-            if tab == AuthTab::Register {
+            if is_reg {
                 match api.register(&u, &p, if em.trim().is_empty() { None } else { Some(em) }, Some(u.clone())).await {
                     Ok(auth) => {
                         if let Some(user) = auth.user {
@@ -73,196 +65,63 @@ pub fn LoginView(on_login_success: EventHandler<User>) -> Element {
         });
     };
 
-    let handle_token_login = move |_| {
-        let t = token_input();
-        if t.trim().is_empty() {
-            error_msg.set(Some("Vui lòng nhập hoặc dán mã Token JWT từ server RouterAI!".to_string()));
-            return;
-        }
-
-        loading.set(true);
-        error_msg.set(None);
-        notice_msg.set(None);
-
-        spawn(async move {
-            let api = ApiClient::new();
-            match api.login_with_token(&t).await {
-                Ok(user) => {
-                    on_login_success.call(user);
-                }
-                Err(e) => {
-                    error_msg.set(Some(format!("Mã Token không hợp lệ hoặc đã hết hạn: {}", e)));
-                }
-            }
-            loading.set(false);
-        });
-    };
-
     let handle_oauth = move |provider: &'static str| {
-        let mut error_msg = error_msg;
         let mut notice_msg = notice_msg;
-        let mut loading = loading;
-        error_msg.set(None);
-        notice_msg.set(None);
-        loading.set(true);
-
-        spawn(async move {
-            let api = ApiClient::new();
-            match api.get_oauth_info().await {
-                Ok(info) => {
-                    if let Some(cfg) = info.providers.get(provider) {
-                        if cfg.configured {
-                            if let Some(url) = &cfg.auth_url {
-                                notice_msg.set(Some(format!("Chuyển hướng cổng {}: {}", cfg.name, url)));
-                            }
-                        } else {
-                            notice_msg.set(Some(format!(
-                                "Cổng đăng nhập {} chưa bật trên server ai.mmovn.space. Vui lòng đăng nhập bằng Mật khẩu hoặc Telegram!",
-                                cfg.name
-                            )));
-                        }
-                    }
-                }
-                Err(_) => {
-                    notice_msg.set(Some(format!(
-                        "Cổng đăng nhập {} yêu cầu cấu hình OAuth trên máy chủ để kích hoạt.",
-                        provider
-                    )));
-                }
-            }
-            loading.set(false);
-        });
+        notice_msg.set(Some(format!("Cổng {} đang bảo trì, vui lòng đăng nhập bằng Mật khẩu hoặc Telegram!", provider)));
     };
 
     rsx! {
         div {
-            style: "flex: 1; display: flex; align-items: center; justify-content: center; width: 100%; min-height: 0; padding: 16px; overflow-y: auto; box-sizing: border-box;",
-            div {
-                class: "card",
-                style: "width: 100%; max-width: 390px; padding: 22px 18px; text-align: center; margin: auto; box-sizing: border-box;",
+            style: "flex: 1; display: flex; align-items: center; justify-content: center; width: 100%; min-height: 0; padding: 16px; overflow-y: auto; box-sizing: border-box; position: relative;",
 
-                // Embedded high-resolution brand logo (guaranteed no 404 in iOS sandbox)
+            // Ambient glowing particle in the background
+            div { class: "login-ambient-bg" }
+
+            div {
+                class: "login-card",
+
+                // Embedded brand logo
                 img {
                     src: "{LOGO_DATA_URI}",
                     alt: "RouterAI",
-                    style: "width: 190px; height: 36px; object-fit: contain; margin: 0 auto 16px auto; display: block;"
+                    style: "width: 195px; height: 38px; object-fit: contain; margin: 0 auto 12px auto; display: block;"
                 }
 
-                // Tab Switcher (Login / Register / Telegram Sync)
-                div {
-                    style: "display: flex; background: #1e1f22; border-radius: 6px; padding: 3px; gap: 4px; margin-bottom: 16px;",
+                // Tab Switcher: Đăng Nhập / Tạo Tài Khoản
+                div { class: "tab-switcher",
                     button {
-                        style: if current_tab() == AuthTab::Login {
-                            "flex: 1; height: 32px; background: #1890ff; color: #fff; border: none; border-radius: 4px; font-weight: 600; font-size: 12px; cursor: pointer;"
-                        } else {
-                            "flex: 1; height: 32px; background: transparent; color: #949ba4; border: none; border-radius: 4px; font-size: 12px; cursor: pointer;"
-                        },
+                        class: if !is_register() { "tab-btn active" } else { "tab-btn" },
                         onclick: move |_| {
-                            current_tab.set(AuthTab::Login);
+                            is_register.set(false);
                             error_msg.set(None);
+                            notice_msg.set(None);
                         },
                         "Đăng Nhập"
                     }
                     button {
-                        style: if current_tab() == AuthTab::Register {
-                            "flex: 1; height: 32px; background: #1890ff; color: #fff; border: none; border-radius: 4px; font-weight: 600; font-size: 12px; cursor: pointer;"
-                        } else {
-                            "flex: 1; height: 32px; background: transparent; color: #949ba4; border: none; border-radius: 4px; font-size: 12px; cursor: pointer;"
-                        },
+                        class: if is_register() { "tab-btn active" } else { "tab-btn" },
                         onclick: move |_| {
-                            current_tab.set(AuthTab::Register);
+                            is_register.set(true);
                             error_msg.set(None);
+                            notice_msg.set(None);
                         },
-                        "Đăng Ký"
-                    }
-                    button {
-                        style: if current_tab() == AuthTab::TelegramSync {
-                            "flex: 1; height: 32px; background: #229ED9; color: #fff; border: none; border-radius: 4px; font-weight: 600; font-size: 12px; cursor: pointer;"
-                        } else {
-                            "flex: 1; height: 32px; background: transparent; color: #949ba4; border: none; border-radius: 4px; font-size: 12px; cursor: pointer;"
-                        },
-                        onclick: move |_| {
-                            current_tab.set(AuthTab::TelegramSync);
-                            error_msg.set(None);
-                        },
-                        "Telegram / Token"
+                        "Tạo Tài Khoản"
                     }
                 }
 
-                if current_tab() == AuthTab::TelegramSync {
-                    // Telegram & Server Token Sync View
-                    div {
-                        style: "background: #25282e; border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 14px; margin-bottom: 14px; text-align: left;",
-                        
-                        div {
-                            style: "display: flex; align-items: center; gap: 8px; margin-bottom: 8px;",
-                            span { style: "color: #229ED9;", IconTelegram {} }
-                            strong { style: "color: #fff; font-size: 13px;", "Xác Thực Telegram RouterAI" }
-                        }
-                        
-                        p {
-                            style: "color: #949ba4; font-size: 12px; line-height: 1.5; margin-bottom: 12px;",
-                            "Hệ thống RouterAI đồng bộ trực tiếp với Bot Telegram "
-                            strong { style: "color: #229ED9;", "@csmmovn_bot" }
-                            " và máy chủ "
-                            strong { style: "color: #1890ff;", "ai.mmovn.space" }
-                            "."
-                        }
-
-                        // Telegram Bot direct link
-                        a {
-                            href: "tg://resolve?domain=csmmovn_bot",
-                            target: "_blank",
-                            class: "btn-secondary",
-                            style: "display: flex; align-items: center; justify-content: center; gap: 8px; background: #229ED9; color: #fff; border: none; font-weight: 600; text-decoration: none; height: 38px; margin-bottom: 8px;",
-                            IconTelegram {}
-                            "Mở Bot @csmmovn_bot trên Telegram"
-                        }
-
-                        // Web Server link
-                        a {
-                            href: "https://ai.mmovn.space/login",
-                            target: "_blank",
-                            class: "btn-secondary",
-                            style: "display: flex; align-items: center; justify-content: center; gap: 8px; background: #313338; color: #dbdee1; border: 1px solid rgba(255,255,255,0.1); font-weight: 500; text-decoration: none; height: 36px; margin-bottom: 14px;",
-                            "Mở trang đăng nhập ai.mmovn.space"
-                        }
-
-                        div { style: "border-top: 1px dashed rgba(255,255,255,0.1); margin: 12px 0;" }
-
-                        div { style: "font-size: 11px; font-weight: 600; color: #58a6ff; margin-bottom: 4px;", "ĐỒNG BỘ TOKEN TỪ SERVER" }
-                        p {
-                            style: "font-size: 11px; color: #80848e; margin-bottom: 8px;",
-                            "Dán mã Token (JWT) từ web hoặc từ Bot để đăng nhập tức thì:"
-                        }
-                        textarea {
-                            class: "input-field",
-                            style: "height: 60px; padding: 8px; font-size: 12px; font-family: monospace; resize: none;",
-                            placeholder: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-                            value: "{token_input}",
-                            oninput: move |e| token_input.set(e.value())
-                        }
-
-                        button {
-                            class: "btn-primary",
-                            disabled: loading(),
-                            onclick: handle_token_login,
-                            if loading() { "Đang đồng bộ..." } else { "Đồng Bộ & Đăng Nhập Ngay" }
-                        }
-                    }
-                } else {
-                    // Username & Password Forms (Login / Register)
-                    div { style: "text-align: left; margin-bottom: 4px; font-size: 11px; font-weight: 600; color: #949ba4;", "TÊN ĐĂNG NHẬP" }
+                // Form Inputs
+                div { style: "width: 100%; text-align: left;",
+                    span { class: "input-label", if !is_register() { "TÊN ĐĂNG NHẬP HOẶC EMAIL" } else { "TÊN ĐĂNG NHẬP *" } }
                     input {
                         class: "input-field",
                         r#type: "text",
-                        placeholder: "Nhập username...",
+                        placeholder: if !is_register() { "Nhập username hoặc email..." } else { "Nhập username..." },
                         value: "{username}",
                         oninput: move |e| username.set(e.value())
                     }
 
-                    if current_tab() == AuthTab::Register {
-                        div { style: "text-align: left; margin-bottom: 4px; font-size: 11px; font-weight: 600; color: #949ba4;", "EMAIL (TÙY CHỌN)" }
+                    if is_register() {
+                        span { class: "input-label", "EMAIL (TÙY CHỌN)" }
                         input {
                             class: "input-field",
                             r#type: "email",
@@ -272,7 +131,7 @@ pub fn LoginView(on_login_success: EventHandler<User>) -> Element {
                         }
                     }
 
-                    div { style: "text-align: left; margin-bottom: 4px; font-size: 11px; font-weight: 600; color: #949ba4;", "MẬT KHẨU" }
+                    span { class: "input-label", if !is_register() { "MẬT KHẨU" } else { "MẬT KHẨU *" } }
                     input {
                         class: "input-field",
                         r#type: "password",
@@ -281,8 +140,8 @@ pub fn LoginView(on_login_success: EventHandler<User>) -> Element {
                         oninput: move |e| password.set(e.value())
                     }
 
-                    if current_tab() == AuthTab::Register {
-                        div { style: "text-align: left; margin-bottom: 4px; font-size: 11px; font-weight: 600; color: #949ba4;", "XÁC NHẬN MẬT KHẨU" }
+                    if is_register() {
+                        span { class: "input-label", "XÁC NHẬN MẬT KHẨU *" }
                         input {
                             class: "input-field",
                             r#type: "password",
@@ -291,80 +150,81 @@ pub fn LoginView(on_login_success: EventHandler<User>) -> Element {
                             oninput: move |e| confirm_password.set(e.value())
                         }
                     }
-
-                    // Submit Button
-                    button {
-                        class: "btn-primary",
-                        disabled: loading(),
-                        onclick: handle_submit,
-                        if loading() { "Đang xử lý..." } else if current_tab() == AuthTab::Register { "Tạo Tài Khoản Ngay" } else { "Đăng Nhập Ngay" }
-                    }
                 }
 
                 // Error / Notice Box
                 if let Some(err) = error_msg() {
                     div {
-                        style: "color: #fa777c; font-size: 12px; background: rgba(250, 119, 124, 0.1); padding: 8px 12px; border-radius: 6px; border: 1px solid rgba(250, 119, 124, 0.25); margin: 12px 0; text-align: left;",
+                        style: "color: #fa777c; font-size: 12px; background: rgba(250, 119, 124, 0.1); padding: 8px 12px; border-radius: 6px; border: 1px solid rgba(250, 119, 124, 0.25); width: 100%; box-sizing: border-box; text-align: center; margin-bottom: 4px;",
                         "{err}"
                     }
                 }
 
                 if let Some(notice) = notice_msg() {
                     div {
-                        style: "color: #58a6ff; font-size: 12px; background: rgba(88, 166, 255, 0.1); padding: 8px 12px; border-radius: 6px; border: 1px solid rgba(88, 166, 255, 0.25); margin: 12px 0; text-align: left;",
+                        style: "color: #58a6ff; font-size: 12px; background: rgba(88, 166, 255, 0.1); padding: 8px 12px; border-radius: 6px; border: 1px solid rgba(88, 166, 255, 0.25); width: 100%; box-sizing: border-box; text-align: center; margin-bottom: 4px;",
                         "{notice}"
                     }
                 }
 
+                // Submit Button
+                button {
+                    class: "btn-primary",
+                    disabled: loading(),
+                    onclick: handle_submit,
+                    if loading() { "Đang xử lý..." } else if is_register() { "Tạo Tài Khoản Ngay" } else { "Đăng Nhập Ngay" }
+                }
+
                 // Social Login Section
-                div {
-                    style: "display: flex; align-items: center; text-align: center; color: #80848e; font-size: 10px; font-weight: 600; letter-spacing: 0.5px; margin: 16px 0 10px 0;",
-                    div { style: "flex: 1; border-bottom: 1px solid rgba(255, 255, 255, 0.08); margin-right: 8px;" }
-                    span { "HOẶC TIẾP TỤC VỚI" }
-                    div { style: "flex: 1; border-bottom: 1px solid rgba(255, 255, 255, 0.08); margin-left: 8px;" }
+                div { class: "divider-text",
+                    span { "« HOẶC TIẾP TỤC VỚI »" }
                 }
 
                 div {
-                    style: "display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px;",
+                    style: "display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%;",
                     button {
                         class: "btn-secondary",
                         style: "gap: 6px; font-size: 12px; height: 36px;",
-                        onclick: move |_| handle_oauth("google"),
+                        onclick: move |_| handle_oauth("Google"),
                         IconGoogle {}
                         "Google"
                     }
                     button {
                         class: "btn-secondary",
                         style: "gap: 6px; font-size: 12px; height: 36px;",
-                        onclick: move |_| handle_oauth("github"),
+                        onclick: move |_| handle_oauth("GitHub"),
                         IconGithub {}
                         "GitHub"
                     }
                     button {
                         class: "btn-secondary",
                         style: "gap: 6px; font-size: 12px; height: 36px;",
-                        onclick: move |_| handle_oauth("discord"),
+                        onclick: move |_| handle_oauth("Discord"),
                         IconDiscord {}
                         "Discord"
                     }
                 }
 
-                // Telegram Switch Button
-                button {
-                    class: "btn-secondary",
-                    style: "background: #229ED9; color: #fff; border: none; font-weight: 600; gap: 8px;",
+                // Telegram Divider
+                div { class: "divider-text",
+                    span { "« HOẶC ĐĂNG NHẬP QUA TELEGRAM »" }
+                }
+
+                // Native Telegram Deep-link Button: Opens Telegram app directly
+                a {
+                    href: "tg://resolve?domain=csmmovn_bot&start=login",
+                    class: "btn-telegram",
+                    target: "_blank",
                     onclick: move |_| {
-                        current_tab.set(AuthTab::TelegramSync);
-                        error_msg.set(None);
-                        notice_msg.set(None);
+                        // Fallback script if deep link needs web trigger
                     },
                     IconTelegram {}
-                    "Đăng nhập qua Telegram (@csmmovn_bot)"
+                    "Đăng nhập qua Telegram"
                 }
 
                 div {
-                    style: "margin-top: 14px; font-size: 11px; color: #80848e;",
-                    "Copyright © 2026 RouterAI Team • ai.mmovn.space"
+                    style: "margin-top: 6px; font-size: 11px; color: #72767d; font-family: -apple-system, BlinkMacSystemFont, sans-serif;",
+                    "Copyright © 2021 - 2026 by RouterAI Team"
                 }
             }
         }

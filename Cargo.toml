@@ -1,6 +1,6 @@
 [package]
 name = "routerai-mobile"
-version = "1.0.2"
+version = "1.0.3"
 edition = "2021"
 authors = ["RouterAI Team <support@mmovn.space>"]
 description = "RouterAI Native Mobile Client for iOS built with 100% Rust"
@@ -24,7 +24,7 @@ objc = "0.2"
 [package.metadata.bundle]
 name = "RouterAI"
 identifier = "space.mmovn.routerai"
-version = "1.0.2"
+version = "1.0.3"
 short_description = "Hệ thống tự động hóa và quản lý RouterAI"
 long_description = "RouterAI Client chính thức dành cho hệ điều hành iOS, xây dựng 100% bằng ngôn ngữ Rust nguyên bản cho hiệu năng siêu cao và an toàn bảo mật."
 icon = ["assets/icon_120.png", "assets/icon_180.png", "assets/icon_1024.png"]

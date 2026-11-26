@@ -243,20 +243,174 @@ body, html {
 /* Inputs */
 .input-field {
     width: 100%;
-    height: 40px;
+    height: 38px;
     background: #1e1f22;
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 6px;
-    color: #ffffff;
+    color: #dbdee1;
     padding: 0 12px;
-    font-size: 14px;
+    font-size: 13px;
     outline: none;
-    margin-bottom: 12px;
-    transition: border-color 0.2s ease;
+    margin-bottom: 10px;
+    transition: all 0.2s ease;
 }
 
 .input-field:focus {
     border-color: #1890ff;
+    box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+}
+
+/* Modern Animations & Glassmorphism */
+@keyframes cardFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(14px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes ambientPulse {
+    0% {
+        opacity: 0.35;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.6;
+        transform: scale(1.12);
+    }
+    100% {
+        opacity: 0.35;
+        transform: scale(1);
+    }
+}
+
+.login-card {
+    width: 100%;
+    max-width: 410px;
+    background: rgba(49, 51, 56, 0.94);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 24px 20px;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    text-align: center;
+    box-sizing: border-box;
+    animation: cardFadeIn 0.35s ease-out;
+    position: relative;
+    z-index: 2;
+}
+
+.login-ambient-bg {
+    position: fixed;
+    width: 320px;
+    height: 320px;
+    background: radial-gradient(circle, rgba(24, 144, 255, 0.18) 0%, rgba(34, 158, 217, 0.08) 50%, transparent 70%);
+    filter: blur(40px);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 1;
+    animation: ambientPulse 7s ease-in-out infinite;
+}
+
+.tab-switcher {
+    display: flex;
+    width: 100%;
+    background: #2b2d31;
+    border-radius: 8px;
+    padding: 3px;
+    gap: 4px;
+    box-sizing: border-box;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.tab-btn {
+    flex: 1;
+    height: 34px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    color: #949ba4;
+    background: transparent;
+}
+
+.tab-btn.active {
+    background: #1890ff;
+    color: #ffffff;
+    box-shadow: 0 2px 6px rgba(24, 144, 255, 0.35);
+}
+
+.input-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #b5bac1;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+    text-align: left;
+    width: 100%;
+    display: block;
+}
+
+.divider-text {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    color: #949ba4;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    width: 100%;
+    margin: 4px 0;
+}
+
+.divider-text::before, .divider-text::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.divider-text::before {
+    margin-right: 8px;
+}
+
+.divider-text::after {
+    margin-left: 8px;
+}
+
+.btn-telegram {
+    width: 100%;
+    height: 40px;
+    background: #229ED9;
+    border: none;
+    border-radius: 6px;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    text-decoration: none;
+    box-shadow: 0 4px 12px rgba(34, 158, 217, 0.35);
+    transition: all 0.2s ease;
+}
+
+.btn-telegram:active {
+    transform: scale(0.98);
+    filter: brightness(1.1);
 }
 
 /* Modals */
