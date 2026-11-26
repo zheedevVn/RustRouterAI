@@ -184,3 +184,93 @@ pub fn IconTelegram() -> Element {
         }
     }
 }
+
+#[component]
+pub fn IconMenu() -> Element {
+    rsx! {
+        svg {
+            view_box: "0 0 24 24",
+            width: "20",
+            height: "20",
+            fill: "none",
+            stroke: "currentColor",
+            stroke_width: "2",
+            stroke_linecap: "round",
+            stroke_linejoin: "round",
+            line { x1: "3", y1: "12", x2: "21", y2: "12" }
+            line { x1: "3", y1: "6", x2: "21", y2: "6" }
+            line { x1: "3", y1: "18", x2: "21", y2: "18" }
+        }
+    }
+}
+
+#[component]
+pub fn IconBell() -> Element {
+    rsx! {
+        svg {
+            view_box: "0 0 24 24",
+            width: "18",
+            height: "18",
+            fill: "none",
+            stroke: "currentColor",
+            stroke_width: "1.8",
+            stroke_linecap: "round",
+            stroke_linejoin: "round",
+            path { d: "M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" }
+            path { d: "M13.73 21a2 2 0 0 1-3.46 0" }
+        }
+    }
+}
+
+#[component]
+pub fn IconMember() -> Element {
+    rsx! {
+        svg {
+            view_box: "0 0 24 24",
+            width: "18",
+            height: "18",
+            fill: "none",
+            stroke: "currentColor",
+            stroke_width: "1.8",
+            stroke_linecap: "round",
+            stroke_linejoin: "round",
+            path { d: "M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" }
+            circle { cx: "12", cy: "7", r: "4" }
+        }
+    }
+}
+
+#[component]
+pub fn IconSend() -> Element {
+    rsx! {
+        svg {
+            view_box: "0 0 24 24",
+            width: "18",
+            height: "18",
+            fill: "none",
+            stroke: "currentColor",
+            stroke_width: "1.8",
+            stroke_linecap: "round",
+            stroke_linejoin: "round",
+            line { x1: "22", y1: "2", x2: "11", y2: "13" }
+            polygon { points: "22 2 15 22 11 13 2 9 22 2" }
+        }
+    }
+}
+
+#[component]
+pub fn IconCrown() -> Element {
+    rsx! {
+        svg {
+            view_box: "0 0 24 24",
+            width: "18",
+            height: "18",
+            fill: "none",
+            stroke: "currentColor",
+            stroke_width: "1.8",
+            stroke_linecap: "round",
+            stroke_linejoin: "round",
+            path { d: "M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14v2H5v-2z" }
+        }
+    }
+}

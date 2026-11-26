@@ -31,9 +31,6 @@ pub fn AccountsView() -> Element {
                         "+ Thêm Tài Khoản"
                     }
                 }
-                p { style: "font-size: 12px; color: #949ba4; margin-bottom: 14px;",
-                    "Quản lý danh sách các số điện thoại Telegram và proxy để phục vụ chiến dịch gửi tin tự động."
-                }
 
                 if loading() {
                     div { style: "text-align: center; padding: 24px; color: #949ba4;", "Đang tải dữ liệu từ máy chủ..." }

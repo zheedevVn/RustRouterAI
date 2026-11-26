@@ -30,9 +30,6 @@ pub fn GroupsView() -> Element {
                         "Quét Nhóm Mới"
                     }
                 }
-                p { style: "font-size: 12px; color: #949ba4; margin-bottom: 14px;",
-                    "Bộ lọc từ khóa tự động cào và phát hiện các nhóm Telegram mục tiêu trên toàn cầu."
-                }
 
                 if loading() {
                     div { style: "text-align: center; padding: 24px; color: #949ba4;", "Đang đồng bộ dữ liệu nhóm..." }

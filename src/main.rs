@@ -8,7 +8,7 @@ mod theme;
 
 use dioxus::prelude::*;
 use models::User;
-use components::{TopHeader, BottomNavBar, CurrentTab};
+use components::{TopHeader, SidebarDrawer, BottomNavBar, CurrentTab};
 use views::*;
 use theme::MAIN_CSS;
 
@@ -104,10 +104,12 @@ fn main() {
 fn App() -> Element {
     let mut current_user = use_signal(|| Option::<User>::None);
     let mut active_tab = use_signal(|| CurrentTab::Dashboard);
+    let mut is_sidebar_open = use_signal(|| false);
 
     let on_logout = move |_| {
         current_user.set(None);
         api::ApiClient::clear_token();
+        is_sidebar_open.set(false);
     };
 
     let user_clone = current_user();
@@ -118,9 +120,20 @@ fn App() -> Element {
 
         div { class: "app-container",
             if let Some(user) = user_clone {
-                // Logged in UI
+                // Top Header Bar
                 TopHeader {
                     user: Some(user.clone()),
+                    on_toggle_sidebar: move |_| is_sidebar_open.set(!is_sidebar_open()),
+                    on_logout: on_logout,
+                }
+
+                // Opaque Sliding Drawer with Backdrop (eliminates transparent overlap bug)
+                SidebarDrawer {
+                    is_open: is_sidebar_open(),
+                    active_tab: active_tab(),
+                    user: Some(user.clone()),
+                    on_select: move |tab| active_tab.set(tab),
+                    on_close: move |_| is_sidebar_open.set(false),
                     on_logout: on_logout,
                 }
 

@@ -413,6 +413,41 @@ body, html {
     filter: brightness(1.1);
 }
 
+/* Sidebar Drawer Items */
+.drawer-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    height: 40px;
+    padding: 0 12px;
+    border-radius: 6px;
+    color: #949ba4;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.drawer-item.active {
+    background: #1890ff;
+    color: #ffffff;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(24, 144, 255, 0.35);
+}
+
+.drawer-item:active:not(.active) {
+    background: rgba(255, 255, 255, 0.08);
+    color: #ffffff;
+}
+
+.drawer-item svg {
+    width: 18px;
+    height: 18px;
+    stroke: currentColor;
+    flex-shrink: 0;
+}
+
+
 /* Modals */
 .modal-overlay {
     position: fixed;
@@ -433,5 +468,30 @@ body, html {
     border-radius: 12px;
     padding: 20px;
     box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+}
+
+@keyframes drawerSlideIn {
+    from { transform: translateX(-100%); }
+    to { transform: translateX(0); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes pulseDot {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.3); opacity: 0.6; }
+}
+
+.live-indicator {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #52c41a;
+    box-shadow: 0 0 8px #52c41a;
+    animation: pulseDot 2s infinite ease-in-out;
 }
 "#;

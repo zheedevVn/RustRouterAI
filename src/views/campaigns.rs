@@ -26,9 +26,6 @@ pub fn CampaignsView() -> Element {
                         "+ Tạo Chiến Dịch"
                     }
                 }
-                p { style: "font-size: 12px; color: #949ba4; margin-bottom: 14px;",
-                    "Thiết lập lịch trình gửi tin nhắn, chọn mẫu văn bản và danh sách nhóm đích."
-                }
 
                 div { style: "display: flex; flex-direction: column; gap: 10px;",
                     for c in dummy_campaigns {

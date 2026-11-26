@@ -1,6 +1,6 @@
 [package]
 name = "routerai-mobile"
-version = "1.0.3"
+version = "1.0.4"
 edition = "2021"
 authors = ["RouterAI Team <support@mmovn.space>"]
 description = "RouterAI Native Mobile Client for iOS built with 100% Rust"

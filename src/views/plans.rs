@@ -5,10 +5,7 @@ pub fn PlansView() -> Element {
     rsx! {
         div { class: "content-scroll",
             div { class: "card",
-                div { class: "card-title", "BẢNG GIÁ & GÓI TÀI KHOẢN VIP" }
-                p { style: "font-size: 12px; color: #949ba4; margin-bottom: 16px;",
-                    "Chọn gói dịch vụ phù hợp với nhu cầu phát triển và mở rộng mạng lưới của bạn."
-                }
+                div { class: "card-title", "GÓI DỊCH VỤ VIP" }
 
                 div { style: "display: flex; flex-direction: column; gap: 14px;",
                     // Gói Starter
